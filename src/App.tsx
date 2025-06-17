@@ -1,5 +1,6 @@
 import {
   Button,
+  Card,
   Center,
   Flex,
   Image,
@@ -281,6 +282,7 @@ function App() {
   return (
     <MantineProvider>
       <Center h="100vh">
+        <Card shadow="lg" padding="lg" radius="md" w="95%" style={{ border: "5px solid rgb(182, 146, 79)", backgroundImage:"url(https://www.pixcrafter.com/wp-content/uploads/2022/11/free-white-paper-texture-background.jpg)", filter: "brightness(1.2)" }}>
         <Stack style={{ textAlign: "center" }}>
           <Center>
           <Image 
@@ -300,7 +302,7 @@ function App() {
             <Button id="op3"></Button>
             <Button id="op4"></Button>
           </Flex>
-        </Stack>
+        </Stack></Card>
       </Center>
     </MantineProvider>
   );

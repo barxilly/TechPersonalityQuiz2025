@@ -2,3 +2,7 @@
   --mantine-font-family: "M PLUS Rounded 1c", "Rubik", "Helvetica", sans-serif !important;
  --mantine-font-family-headings: "M PLUS Rounded 1c", "Rubik", "Helvetica", sans-serif !important;
 }
+
+body {
+  background-image: url(https://cdn.shopify.com/s/files/1/0786/6341/8157/files/white_oak_1024x1024.webp?v=1711520124);
+}
