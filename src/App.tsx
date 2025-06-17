@@ -247,6 +247,7 @@ function App() {
         personalities[a as Personality] > personalities[b as Personality] ? a : b
       );
       const certainty = (personalities[personality as Personality] / questions.length) * 100;
+      setDinoSrc("/img/done.png"); // Set dino to shocked image on completion
       setResult({ personality, certainty });
       setFinalScores({ ...personalities }); // Store the scores for close competitors
       setCompleted(true);

@@ -1,7 +1,8 @@
 - [x] Proper Mobile Support
 - [ ] Emotive Reactions
 - [x] Ending Screen
-- [ ] Ending Reaction
+- [x] Ending Reaction
+- [ ] Logo?
 - [ ] Starting Screen?
 - [ ] Share Card
 - [ ] Better Card Borders
