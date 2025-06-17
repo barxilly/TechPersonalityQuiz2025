@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Button,
   Card,
@@ -25,6 +26,11 @@ type Personality =
   | "grandma";
 
 function App() {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedOptions, setSelectedOptions] = useState<string[][]>([]);
+  const [completed, setCompleted] = useState(false);
+  const [result, setResult] = useState<{personality: string, certainty: number} | null>(null);
+  const [finalScores, setFinalScores] = useState<Record<Personality, number> | null>(null);
   let personalities: Record<Personality, number> = {
     arch: 0, // Arch BTW
     apple: 0, // Apple Greaser
@@ -212,87 +218,69 @@ function App() {
     },
   ];
 
-  let currentQuestionIndex = 0;
-  let currentQuestion = questions[currentQuestionIndex];
-  let selectedOptions: string[][] = [];
-  let totalQuestions = questions.length;
+  const dinoImages = [
+    "/img/confused.png",
+    "/img/ehh.png",
+    "/img/shock.png",
+    "/img/simple.png"
+  ];
+  const [dinoSrc, setDinoSrc] = useState<string>("/img/simple.png");
 
-  window.onload = () => {
-    const buttons = document.querySelectorAll("button");
-    const dinos = [
-      "confused.jpg",
-      "ehh.png",
-      "ok.jpg"
-    ]
-    const dino = document.getElementById("dino") as HTMLImageElement;
-    if (!dino) {
-      console.error("Dino element not found");
-      return;
-    }
-    dino.src = "/img/simple.png";;
-    buttons.forEach((button, index) => {
-      button.textContent = currentQuestion.options[index].text;
-      button.onclick = () => {
-         dino.src = "/img/"+dinos[Math.floor(Math.random() * dinos.length)];
-        selectedOptions.push(currentQuestion.options[index].score);
-        currentQuestionIndex++;
-        if (currentQuestionIndex < totalQuestions) {
-          currentQuestion = questions[currentQuestionIndex];
-          updateUI();
-        } else {
-          calculateResults();
-        }
-        // unselect all buttons (move focus to invisible element
-        const invisibleElement = document.createElement("span");
-        invisibleElement.tabIndex = -1;
-        document.body.appendChild(invisibleElement);
-        invisibleElement.focus();
-        invisibleElement.remove();
-      };
-    });
-  };
-
-  function updateUI() {
-    const questionElement = document.querySelector("h2");
-    if (!questionElement) {
-      console.error("Question element not found");
-      return;
-    }
-    questionElement.textContent = currentQuestion.question;
-
-    const buttons = document.querySelectorAll("button");
-    buttons.forEach((button, index) => {
-      button.textContent = currentQuestion.options[index].text;
-    });
-  }
-
-  function calculateResults() {
-    selectedOptions.forEach((optionScores) => {
-      optionScores.forEach((score) => {
-        personalities[score as Personality] += 1;
+  function handleOption(index: number) {
+    // Change dino image randomly (not repeating the same image)
+    let nextImages = dinoImages.filter(img => img !== dinoSrc);
+    setDinoSrc(nextImages[Math.floor(Math.random() * nextImages.length)]);
+    
+    const currentQuestion = questions[currentQuestionIndex];
+    const newSelected = [...selectedOptions, currentQuestion.options[index].score];
+    setSelectedOptions(newSelected);
+    if (currentQuestionIndex + 1 < questions.length) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      // Calculate results
+      newSelected.forEach((optionScores) => {
+        optionScores.forEach((score) => {
+          personalities[score as Personality] += 1;
+        });
       });
-    });
-
-    const personality = Object.keys(personalities).reduce((a, b) =>
-      personalities[a as Personality] > personalities[b as Personality] ? a : b
-    );
-    alert(`Your tech personality is: ${personality}`);
-    console.log("Personality scores:", personalities);
-    alert(
-      `Certainty: ${
-        (personalities[personality as Personality] / totalQuestions) * 100
-      }%`
-    );
+      const personality = Object.keys(personalities).reduce((a, b) =>
+        personalities[a as Personality] > personalities[b as Personality] ? a : b
+      );
+      const certainty = (personalities[personality as Personality] / questions.length) * 100;
+      setResult({ personality, certainty });
+      setFinalScores({ ...personalities }); // Store the scores for close competitors
+      setCompleted(true);
+    }
   }
+
+  function isMobile() {
+    console.log("Mobile check:", /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 768);
+    return /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+  }
+
+  const hrpers: Record<string, string> = {
+    arch: "I use Arch BTW",
+    apple: "Apple Greaser",
+    hardcore: "Hardcore",
+    newb: "Newbie",
+    broke: "Broke",
+    design: "Design Nut",
+    basic: "Basic",
+    vibecoder: "AI Slopcoder",
+    rich: "Bougie B*tch",
+    grandma: "Grandma",
+  };
+  
+  // style={{ backgroundImage:"url(https://www.pixcrafter.com/wp-content/uploads/2022/11/free-white-paper-texture-background.jpg)", filter: "brightness(1.2)", backgroundSize: "cover", opacity: "0.9" }}>
 
   return (
     <MantineProvider>
       <Center h="100vh">
-        <Card shadow="lg" padding="lg" radius="md" w="95%" style={{ border: "5px solid rgb(182, 146, 79)", backgroundImage:"url(https://www.pixcrafter.com/wp-content/uploads/2022/11/free-white-paper-texture-background.jpg)", filter: "brightness(1.2)", backgroundSize: "cover" }}>
+        <Card shadow="xl" padding="lg" radius="md" w="95%" className="glassDiv">
         <Stack style={{ textAlign: "center" }}>
           <Center>
           <Image 
-          src=""
+          src={dinoSrc}
           id="dino"
           w="20%"
           /></Center>
@@ -301,13 +289,40 @@ function App() {
             New and Improved... or something along those lines.
           </Title>
           <Space h="xl" />
-          <Title order={2}>{currentQuestion.question}</Title>
-          <Flex gap="md" justify={"center"} wrap="wrap">
-            <Button id="op1"></Button>
-            <Button id="op2"></Button>
-            <Button id="op3"></Button>
-            <Button id="op4"></Button>
-          </Flex>
+          {completed && result ? (
+            <Stack> <Center>
+              <Card shadow="xl" padding="lg" radius="md" w="fit-content" p="2em" className="glassDiv">
+              <Title order={2}>Quiz Complete!</Title>
+              <Title order={3}>Your tech personality is: {hrpers[result.personality]}</Title>
+              <Title order={4}>Certainty: {result.certainty.toFixed(1)}%</Title></Card></Center>
+              <Title order={5}>Close competitors:</Title>
+              <Flex justify="center" wrap="wrap" gap="md">
+                {finalScores && Object.entries(finalScores)
+                  .filter(([key]) => key !== result.personality)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 3)
+                  .map(([key, value]) => (
+                    <Title order={6} key={key}>
+                      {hrpers[key]}: {((value / questions.length) * 100).toFixed(1)}%
+                    </Title>
+                  ))}
+              </Flex>
+              
+            </Stack>
+          ) : (
+            <>
+              <Title order={2}>{questions[currentQuestionIndex].question}</Title>
+              {!isMobile() ? <Flex gap="md" justify={"center"} wrap="wrap">
+                {questions[currentQuestionIndex].options.map((option, idx) => (
+                  <Button key={idx} onClick={() => handleOption(idx)}>{option.text}</Button>
+                ))}
+              </Flex>:<Center><Stack gap="md" justify={"center"} w="fit-content">
+                {questions[currentQuestionIndex].options.map((option, idx) => (
+                  <Button key={idx} onClick={() => handleOption(idx)}>{option.text}</Button>
+                ))}
+              </Stack></Center>}
+            </>
+          )}
         </Stack></Card>
       </Center>
     </MantineProvider>
