@@ -5,4 +5,28 @@
 
 body {
   background-image: url(https://cdn.shopify.com/s/files/1/0786/6341/8157/files/white_oak_1024x1024.webp?v=1711520124);
+  background-size: cover;
 }
+
+.mantine-Button-root {
+  background: #f0f0f000 !important;
+  color: #333 !important;
+  border-radius: 8px !important;
+}
+
+.mantine-Button-root:hover,
+.mantine-Button-root:focus {
+  background: url(https://static.vecteezy.com/system/resources/thumbnails/011/663/926/small_2x/abstract-colorful-scribble-line-stroke-artistic-graphic-design-elements-for-lower-third-brush-lines-text-effect-photo-overlay-etc-chinese-style-abstract-brush-strokes-free-png.png) !important;
+  color: #333 !important;
+  background-size: 100% 100% !important;
+  border:none !important;
+}
+.mantine-Button-root:active {
+  background: url(https://static.vecteezy.com/system/resources/thumbnails/011/663/926/small_2x/abstract-colorful-scribble-line-stroke-artistic-graphic-design-elements-for-lower-third-brush-lines-text-effect-photo-overlay-etc-chinese-style-abstract-brush-strokes-free-png.png) !important;
+  color: #333 !important;
+  background-size: 90% 90% !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border:none !important;
+}
+

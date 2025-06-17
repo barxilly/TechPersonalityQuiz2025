@@ -242,6 +242,12 @@ function App() {
         } else {
           calculateResults();
         }
+        // unselect all buttons (move focus to invisible element
+        const invisibleElement = document.createElement("span");
+        invisibleElement.tabIndex = -1;
+        document.body.appendChild(invisibleElement);
+        invisibleElement.focus();
+        invisibleElement.remove();
       };
     });
   };
@@ -282,7 +288,7 @@ function App() {
   return (
     <MantineProvider>
       <Center h="100vh">
-        <Card shadow="lg" padding="lg" radius="md" w="95%" style={{ border: "5px solid rgb(182, 146, 79)", backgroundImage:"url(https://www.pixcrafter.com/wp-content/uploads/2022/11/free-white-paper-texture-background.jpg)", filter: "brightness(1.2)" }}>
+        <Card shadow="lg" padding="lg" radius="md" w="95%" style={{ border: "5px solid rgb(182, 146, 79)", backgroundImage:"url(https://www.pixcrafter.com/wp-content/uploads/2022/11/free-white-paper-texture-background.jpg)", filter: "brightness(1.2)", backgroundSize: "cover" }}>
         <Stack style={{ textAlign: "center" }}>
           <Center>
           <Image 
@@ -291,7 +297,7 @@ function App() {
           w="20%"
           /></Center>
           <Title order={1}>Barxilly's Tech Personality Quiz 2</Title>
-          <Title order={3}>
+          <Title order={4}>
             New and Improved... or something along those lines.
           </Title>
           <Space h="xl" />
