@@ -1,14 +1,13 @@
 - [x] Proper Mobile Support
-- [ ] Emotive Reactions
 - [x] Ending Screen
 - [x] Ending Reaction
 - [ ] Logo?
 - [ ] Starting Screen?
-- [ ] Share Card
+- [x] Share Card
 - [ ] Better Card Borders
-- [ ] Shuffle Answers
+- [x] Shuffle Answers
 - [ ] Progress Bar
-- [ ] Sounds
+- [x] Sounds
 - [ ] Animations
 - [ ] README
 - [ ] Title & Favicon

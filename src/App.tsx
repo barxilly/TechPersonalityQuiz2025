@@ -8,10 +8,14 @@ import {
   MantineProvider,
   Space,
   Stack,
+  Text,
   Title,
 } from "@mantine/core";
+import { Notifications, showNotification } from "@mantine/notifications";
+import { toPng } from "html-to-image";
 import "./App.css";
 import "@mantine/core/styles.css";
+import { FaSlack } from "react-icons/fa";
 
 type Personality =
   | "arch"
@@ -25,12 +29,28 @@ type Personality =
   | "rich"
   | "grandma";
 
+// Fisher-Yates shuffle
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<string[][]>([]);
   const [completed, setCompleted] = useState(false);
-  const [result, setResult] = useState<{personality: string, certainty: number} | null>(null);
-  const [finalScores, setFinalScores] = useState<Record<Personality, number> | null>(null);
+  const [result, setResult] = useState<{
+    personality: string;
+    certainty: number;
+  } | null>(null);
+  const [finalScores, setFinalScores] = useState<Record<
+    Personality,
+    number
+  > | null>(null);
   let personalities: Record<Personality, number> = {
     arch: 0, // Arch BTW
     apple: 0, // Apple Greaser
@@ -42,6 +62,19 @@ function App() {
     vibecoder: 0, // AI slop coder
     rich: 0, // Rich
     grandma: 0, // Grandma
+  };
+
+  const personalityImages: Record<Personality, string> = {
+    arch: "/img/arch.jpeg",
+    apple: "/img/apple.jpg",
+    hardcore: "/img/hardcore.jpg",
+    newb: "/img/newb.jpeg",
+    broke: "/img/broke.jpeg",
+    design: "/img/design.jpg",
+    basic: "/img/basic.jpg",
+    vibecoder: "/img/vibecoder.png",
+    rich: "/img/rich.jpg",
+    grandma: "/img/grandma.jpg",
   };
 
   let questions = [
@@ -218,23 +251,50 @@ function App() {
     },
   ];
 
+  // Shuffle options for each question on first render
+  const [shuffledQuestions] = useState(() =>
+    questions.map((q) => ({ ...q, options: shuffleArray(q.options) }))
+  );
+
   const dinoImages = [
     "/img/confused.png",
     "/img/ehh.png",
     "/img/shock.png",
-    "/img/simple.png"
+    "/img/simple.png",
   ];
   const [dinoSrc, setDinoSrc] = useState<string>("/img/simple.png");
 
   function handleOption(index: number) {
     // Change dino image randomly (not repeating the same image)
-    let nextImages = dinoImages.filter(img => img !== dinoSrc);
+    let nextImages = dinoImages.filter((img) => img !== dinoSrc);
     setDinoSrc(nextImages[Math.floor(Math.random() * nextImages.length)]);
-    
-    const currentQuestion = questions[currentQuestionIndex];
-    const newSelected = [...selectedOptions, currentQuestion.options[index].score];
+
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
+    const newSelected = [
+      ...selectedOptions,
+      currentQuestion.options[index].score,
+    ];
     setSelectedOptions(newSelected);
-    if (currentQuestionIndex + 1 < questions.length) {
+    // invisible element to focus
+    const invisibleElement = document.createElement("button");
+
+    // Play 0.7 seconds of scribble.mp3
+    const audio = new Audio("/audio/scribble.mp3");
+    audio.play().catch((error) => {
+      console.error("Audio playback failed:", error);
+      showNotification({
+        message: "Audio playback failed. Please check your device settings.",
+        color: "red",
+        autoClose: 3000,
+        style: { position: "fixed", top: 16, right: 16, zIndex: 9999 },
+      });
+    });
+    
+
+    document.body.appendChild(invisibleElement);
+    invisibleElement.focus();
+    document.body.removeChild(invisibleElement);
+    if (currentQuestionIndex + 1 < shuffledQuestions.length) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       // Calculate results
@@ -244,10 +304,16 @@ function App() {
         });
       });
       const personality = Object.keys(personalities).reduce((a, b) =>
-        personalities[a as Personality] > personalities[b as Personality] ? a : b
+        personalities[a as Personality] > personalities[b as Personality]
+          ? a
+          : b
       );
-      const certainty = (personalities[personality as Personality] / questions.length) * 100;
+      const certainty =
+        (personalities[personality as Personality] / shuffledQuestions.length) *
+        100;
       setDinoSrc("/img/done.png"); // Set dino to shocked image on completion
+      // Set dino image size to 20% of the container width
+      document.getElementById("dino")!.style.width = "10% !important"; // Adjust size for better visibility
       setResult({ personality, certainty });
       setFinalScores({ ...personalities }); // Store the scores for close competitors
       setCompleted(true);
@@ -255,76 +321,222 @@ function App() {
   }
 
   function isMobile() {
-    console.log("Mobile check:", /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 768);
+    console.log(
+      "Mobile check:",
+      /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 768
+    );
     return /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+  }
+
+  function isSmallMobile() {
+    return window.innerHeight < 790;
   }
 
   const hrpers: Record<string, string> = {
     arch: "I use Arch BTW",
     apple: "Apple Greaser",
-    hardcore: "Hardcore",
+    hardcore: "Hardcore Dev",
     newb: "Newbie",
-    broke: "Broke",
+    broke: "Brokie",
     design: "Design Nut",
-    basic: "Basic",
+    basic: "Basic Dev",
     vibecoder: "AI Slopcoder",
     rich: "Bougie B*tch",
     grandma: "Grandma",
   };
-  
+
   // style={{ backgroundImage:"url(https://www.pixcrafter.com/wp-content/uploads/2022/11/free-white-paper-texture-background.jpg)", filter: "brightness(1.2)", backgroundSize: "cover", opacity: "0.9" }}>
+
+  // Handler to copy results card as image
+  async function handleCopyCardImage() {
+    const card = document.getElementById("results-card");
+    if (!card) return;
+    try {
+      const dataUrl = await toPng(card, { skipFonts: true });
+      const blob = await (await fetch(dataUrl)).blob();
+      await navigator.clipboard.write([
+        new window.ClipboardItem({ "image/png": blob }),
+      ]);
+      showNotification({
+        message: "Results card copied as image!",
+        color: "teal",
+        autoClose: 2000,
+        style: { position: "fixed", top: 16, right: 16, zIndex: 9999 },
+      });
+    } catch (e) {
+      showNotification({
+        message: "Failed to copy image.",
+        color: "red",
+        autoClose: 2000,
+        style: { position: "fixed", top: 16, right: 16, zIndex: 9999 },
+      });
+    }
+  }
+
+  window.onload = () => {
+    if (isSmallMobile()) {
+      showNotification({
+        message:
+          "Ur device very smol, quiz will still work, but desktop experience is better.",
+        color: "yellow",
+        autoClose: 5000,
+        style: { position: "fixed", top: 16, right: "5%", zIndex: 9999, maxWidth: "90%" },
+      });
+    } else if (isMobile()) {
+      showNotification({
+        message:
+          "Mobile experience is not fully kitted out, please use a desktop for the best experience.",
+        color: "yellow",
+        autoClose: 5000,
+        style: { position: "fixed", top: 16, right: "5%", zIndex: 9999, maxWidth: "90%" },
+      });
+    }
+  };
 
   return (
     <MantineProvider>
+      <Notifications position="top-right" zIndex={9999} />
       <Center h="100vh">
-        <Card shadow="xl" padding="lg" radius="md" w="95%" className="glassDiv">
-        <Stack style={{ textAlign: "center" }}>
-          <Center>
-          <Image 
-          src={dinoSrc}
-          id="dino"
-          w="20%"
-          /></Center>
-          <Title order={1}>Barxilly's Tech Personality Quiz 2</Title>
-          <Title order={4}>
-            New and Improved... or something along those lines.
-          </Title>
-          <Space h="xl" />
-          {completed && result ? (
-            <Stack> <Center>
-              <Card shadow="xl" padding="lg" radius="md" w="fit-content" p="2em" className="glassDiv">
-              <Title order={2}>Quiz Complete!</Title>
-              <Title order={3}>Your tech personality is: {hrpers[result.personality]}</Title>
-              <Title order={4}>Certainty: {result.certainty.toFixed(1)}%</Title></Card></Center>
-              <Title order={5}>Close competitors:</Title>
-              <Flex justify="center" wrap="wrap" gap="md">
-                {finalScores && Object.entries(finalScores)
-                  .filter(([key]) => key !== result.personality)
-                  .sort((a, b) => b[1] - a[1])
-                  .slice(0, 3)
-                  .map(([key, value]) => (
-                    <Title order={6} key={key}>
-                      {hrpers[key]}: {((value / questions.length) * 100).toFixed(1)}%
+        <Card shadow="xl" padding="lg" radius="md" w="95%" className="glassDiv" style={{ maxHeight: "95vh", overflowY: "auto" }}>
+          <Stack style={{ textAlign: "center" }}>
+            {isSmallMobile() && completed ? (
+              <></>
+            ) : (
+              <Center>
+                <Image
+                  src={dinoSrc}
+                  id="dino"
+                  style={{
+                    width: completed ? (isMobile() ? "40%" : "10%") : "20%",
+                  }}
+                />
+              </Center>
+            )}
+         <Title order={1}>Barxilly's Tech Personality Quiz 2</Title>
+            <Title order={4}>
+              New and Improved... or something along those lines.
+            </Title>
+            <Space h="xl" />
+            {completed && result ? (
+              <Stack>
+                <Center>
+                  <Card
+                    id="results-card"
+                    shadow="sm"
+                    padding="xl"
+                    radius="md"
+                    withBorder
+                    className="glassDiv for"
+                    onClick={handleCopyCardImage}
+                    style={{ cursor: "pointer", position: "relative" }}
+                    title="Click to copy as image"
+                  >
+                    {isMobile() ? (
+                      <Card.Section>
+                        <Image
+                          src={
+                            personalityImages[result.personality as Personality]
+                          }
+                          alt={result.personality}
+                          h="150px"
+                          style={{ objectFit: "cover", borderRadius: "md" }}
+                        />
+                      </Card.Section>
+                    ) : (
+                      <Card.Section>
+                        <Image
+                          src={
+                            personalityImages[result.personality as Personality]
+                          }
+                          alt={result.personality}
+                          h="200px"
+                        />
+                      </Card.Section>
+                    )}
+
+                    <Space h="md" />
+                    <Title order={2}>Quiz Complete!</Title>
+                    <Title order={3}>
+                      Your tech personality is: {hrpers[result.personality]}
                     </Title>
-                  ))}
-              </Flex>
-              
-            </Stack>
-          ) : (
-            <>
-              <Title order={2}>{questions[currentQuestionIndex].question}</Title>
-              {!isMobile() ? <Flex gap="md" justify={"center"} wrap="wrap">
-                {questions[currentQuestionIndex].options.map((option, idx) => (
-                  <Button key={idx} onClick={() => handleOption(idx)}>{option.text}</Button>
-                ))}
-              </Flex>:<Center><Stack gap="md" justify={"center"} w="fit-content">
-                {questions[currentQuestionIndex].options.map((option, idx) => (
-                  <Button key={idx} onClick={() => handleOption(idx)}>{option.text}</Button>
-                ))}
-              </Stack></Center>}
-            </>
-          )}
-        </Stack></Card>
+                    <Title order={4}>
+                      Certainty: {result.certainty.toFixed(1)}%
+                    </Title>
+                    <Space h="md" />
+                    {isMobile() ? (
+                      <></>
+                    ) : (
+                      <>
+                        <Title order={5}>Close competitors:</Title>
+                        <Flex justify="center" wrap="wrap" gap="md">
+                          {finalScores &&
+                            Object.entries(finalScores)
+                              .filter(([key]) => key !== result.personality)
+                              .sort((a, b) => b[1] - a[1])
+                              .slice(0, 3)
+                              .map(([key, value]) => (
+                                <Title order={6} key={key}>
+                                  {hrpers[key]}:{" "}
+                                  {(
+                                    (value / shuffledQuestions.length) *
+                                    100
+                                  ).toFixed(1)}
+                                  %
+                                </Title>
+                              ))}
+                        </Flex>
+                        <Space h="md" />{" "}
+                      </>
+                    )}
+                    <Text>
+                      tpq.benjs.uk by  <a href="https://hackclub.slack.com/team/U078L1ETM6E" target="_blank"><FaSlack style={{ verticalAlign: "middle",paddingBottom: "0.1em",}}/> @barxilly</a>
+                    </Text>
+                  </Card>
+                </Center>
+
+                {isMobile() ? (
+                  <></>
+                ) : (
+                  <Button
+                    onClick={handleCopyCardImage}
+                    style={{ alignSelf: "center", marginTop: "md" }}
+                  >
+                    Copy Results Card as Image
+                  </Button>
+                )}
+              </Stack>
+            ) : (
+              <>
+                <Title order={2}>
+                  {shuffledQuestions[currentQuestionIndex].question}
+                </Title>
+                {!isMobile() ? (
+                  <Flex gap="md" justify={"center"} wrap="wrap">
+                    {shuffledQuestions[currentQuestionIndex].options.map(
+                      (option, idx) => (
+                        <Button key={idx} onClick={() => handleOption(idx)}>
+                          {option.text}
+                        </Button>
+                      )
+                    )}
+                  </Flex>
+                ) : (
+                  <Center>
+                    <Stack gap="md" justify={"center"} w="fit-content">
+                      {shuffledQuestions[currentQuestionIndex].options.map(
+                        (option, idx) => (
+                          <Button key={idx} onClick={() => handleOption(idx)}>
+                            {option.text}
+                          </Button>
+                        )
+                      )}
+                    </Stack>
+                  </Center>
+                )}
+              </>
+            )}
+          </Stack>
+        </Card>
       </Center>
     </MantineProvider>
   );

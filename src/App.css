@@ -7,6 +7,8 @@
 body {
   background-image: url(https://cdn.shopify.com/s/files/1/0786/6341/8157/files/white_oak_1024x1024.webp?v=1711520124);
   background-size: cover;
+  user-select: none;
+  overflow-y: scroll !important;
 }
 
 .mantine-Button-root {
@@ -35,4 +37,20 @@ body {
 .glassDiv {
     backdrop-filter: blur(16px);
     background-color: #ffffffdd !important;
+  }
+
+  .for:hover {
+box-shadow: -1px 8px 15px 1px rgba(0,0,0,0.15);
+transform: scale(1.025);
+  }
+
+  a {
+    text-decoration: none !important;
+    color: #144376 !important;
+    font-weight: 500 !important;
+  }
+
+  a:hover {
+    text-decoration: underline !important;
+    color: #144376 !important;
   }
