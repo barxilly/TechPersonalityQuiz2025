@@ -6,8 +6,10 @@
 - [x] Share Card
 - [ ] Better Card Borders
 - [x] Shuffle Answers
-- [ ] Progress Bar
+- [x] Progress Bar
 - [x] Sounds
 - [ ] Animations
 - [ ] README
-- [ ] Title & Favicon
+- [x] Title & Favicon
+- [x] Back Button
+- [ ] Embeds

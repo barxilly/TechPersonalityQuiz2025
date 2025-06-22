@@ -6,6 +6,7 @@ import {
   Flex,
   Image,
   MantineProvider,
+  Progress,
   Space,
   Stack,
   Text,
@@ -15,7 +16,7 @@ import { Notifications, showNotification } from "@mantine/notifications";
 import { toPng } from "html-to-image";
 import "./App.css";
 import "@mantine/core/styles.css";
-import { FaSlack } from "react-icons/fa";
+import { FaBackward, FaSlack } from "react-icons/fa";
 
 type Personality =
   | "arch"
@@ -329,7 +330,7 @@ function App() {
   }
 
   function isSmallMobile() {
-    return window.innerHeight < 790;
+    return window.innerHeight < 500 || window.innerWidth < 700;
   }
 
   const hrpers: Record<string, string> = {
@@ -397,8 +398,31 @@ function App() {
     <MantineProvider>
       <Notifications position="top-right" zIndex={9999} />
       <Center h="100vh">
-        <Card shadow="xl" padding="lg" radius="md" w="95%" className="glassDiv" style={{ maxHeight: "95vh", overflowY: "auto" }}>
-          <Stack style={{ textAlign: "center" }}>
+        <Card shadow="xl" padding="lg" radius="md" w="95%" className="glassDiv" style={{ position:"relative",maxHeight: "95vh", overflowY: "auto" }}>
+          {completed ? <></> : <><Progress value={(currentQuestionIndex / shuffledQuestions.length) * 100} size="md" color="blue" radius={0} style={{ 
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            backgroundColor: "rgba(255, 255, 255, 0)",
+           }} />
+           {currentQuestionIndex > 0 ? <FaBackward 
+            style={{
+              position: "absolute",
+              top: "1.5em",
+              left: "1.5em",
+              cursor: "pointer",
+              color: "#00000055",
+            }}
+            onClick={() => {
+              if (currentQuestionIndex > 0) {
+                setCurrentQuestionIndex(currentQuestionIndex - 1);
+                setDinoSrc("/img/simple.png"); // Reset dino image
+              }
+            }} 
+            /> : <></>}
+           </>}
+          <Stack style={{ textAlign: "center", marginTop: "0.3em" }}>
             {isSmallMobile() && completed ? (
               <></>
             ) : (
