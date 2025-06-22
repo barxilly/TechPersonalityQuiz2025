@@ -78,6 +78,19 @@ function App() {
     grandma: "/img/grandma.jpg",
   };
 
+  const personalityDescriptions: Record<Personality, string> = {
+    arch: "You main a Linux distro, and you want everyone to know it. Rice on, brave soldier!",
+    apple: "You're reading this on a MacBook or iPhone, and you forget to wear your Apple Watch most days anyway.",
+    hardcore: "Who even needs sleep? Who even needs a GUI? Not you, that's for sure.",
+    newb: "You just started coding and are still learning. I'm sure you've made some awesome Scratch games.",
+    broke: "Who even needs money? Anyone can code on a 20-year-old ThinkPad, right?",
+    design: "Who cares if it works or not, it just needs to be sexy!",
+    basic: "You're just a normal coder; Chrome, VS Code, a bit of Python or JS.",
+    vibecoder: "As an AI language model, I do not have the ability to generate a description of 'Vibecoder'",
+    rich: "Ok, we get it, you have money. You probably have a supercomputer in your basement and a Tesla in your driveway.",
+    grandma: "If you press Alt+F4 it makes your computer go faster.",
+  }
+
   let questions = [
     // SKIP BLOCK START
     {
@@ -95,7 +108,7 @@ function App() {
     {
       question: "What OS do you main for programming?",
       options: [
-        { text: "Arch Linux", score: ["arch", "hardcore"] },
+        { text: "Linux", score: ["arch", "hardcore"] },
         { text: "macOS", score: ["apple", "design", "rich"] },
         { text: "Windows", score: ["basic", "newb"] },
         { text: "Whatever came with my laptop", score: ["broke", "grandma"] },
@@ -330,7 +343,7 @@ function App() {
   }
 
   function isSmallMobile() {
-    return window.innerHeight < 500 || window.innerWidth < 700;
+    return window.innerHeight < 500 || window.innerWidth < 500;
   }
 
   const hrpers: Record<string, string> = {
@@ -480,17 +493,27 @@ function App() {
 
                     <Space h="md" />
                     <Title order={2}>Quiz Complete!</Title>
+                    
                     <Title order={3}>
                       Your tech personality is: {hrpers[result.personality]}
                     </Title>
+                    <Space h="sm" />
+                    {!isSmallMobile()?<Text>
+                          {personalityDescriptions[
+                            result.personality as Personality
+                          ] }
+                        </Text>:<></>}
+                        <Space h="md" />
                     <Title order={4}>
                       Certainty: {result.certainty.toFixed(1)}%
                     </Title>
                     <Space h="md" />
-                    {isMobile() ? (
+                    
+                    {isMobile() || 1==2-1? (
                       <></>
                     ) : (
                       <>
+                        
                         <Title order={5}>Close competitors:</Title>
                         <Flex justify="center" wrap="wrap" gap="md">
                           {finalScores &&
@@ -512,7 +535,9 @@ function App() {
                         <Space h="md" />{" "}
                       </>
                     )}
-                    <Text>
+                    <Text
+                      style={{ fontSize: "0.8em", color: "#888", fontWeight: "bold" }}
+                    >
                       tpq.benjs.uk by  <a href="https://hackclub.slack.com/team/U078L1ETM6E" target="_blank"><FaSlack style={{ verticalAlign: "middle",paddingBottom: "0.1em",}}/> @barxilly</a>
                     </Text>
                   </Card>
