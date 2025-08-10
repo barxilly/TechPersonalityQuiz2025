@@ -263,6 +263,15 @@ function App() {
         { text: "Whatever’s free or on sale", score: ["broke", "grandma"] },
       ],
     },
+    {
+      question: "How many shells do you have right now?",
+      options: [
+        { text: "Less than 50", score: ["broke", "newb"] },
+        { text: "50-200", score: ["basic", "grandma"] },
+        { text: "200-1000", score: ["arch", "vibecoder"] },
+        { text: "More than 1000", score: ["rich", "hardcore"] },
+      ],
+    },
   ];
 
   // Shuffle options for each question on first render
