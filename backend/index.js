@@ -31,16 +31,20 @@ app.post("/data", (req, res) => {
   const final = datajson.final;
 
   if (typeof answers === "undefined" || answers === null) {
+    console.error("Missing answers in data:", datajson);
     return res.status(400).json({ error: "Missing answers" });
   }
   if (!Array.isArray(answers) && typeof answers !== "number") {
+    console.error("Invalid answers type in data:", datajson);
     return res.status(400).json({ error: "Invalid answers type" });
   }
 
   if (typeof final === "undefined" || final === null) {
+    console.error("Missing final in data:", datajson);
     return res.status(400).json({ error: "Missing final" });
   }
   if (typeof final !== "string" && typeof final !== "number") {
+    console.error("Invalid final type in data:", datajson);
     return res.status(400).json({ error: "Invalid final type" });
   }
 
