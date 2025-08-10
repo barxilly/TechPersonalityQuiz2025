@@ -16,6 +16,7 @@ import { Notifications, showNotification } from "@mantine/notifications";
 import { toPng } from "html-to-image";
 import "./App.css";
 import "@mantine/core/styles.css";
+ import { useEffect } from "react";
 import { FaBackward, FaSlack } from "react-icons/fa";
 
 type Personality =
@@ -44,6 +45,7 @@ function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<string[][]>([]);
   const [completed, setCompleted] = useState(false);
+  const [sent, setSent] = useState(false);
   const [result, setResult] = useState<{
     personality: string;
     certainty: number;
@@ -396,7 +398,10 @@ function App() {
     }
   }
 
-  window.onload = () => {
+  // Show notifications and set up interval using useEffect
+ 
+
+  useEffect(() => {
     if (isSmallMobile()) {
       showNotification({
         message:
@@ -414,7 +419,29 @@ function App() {
         style: { position: "fixed", top: 16, right: "5%", zIndex: 9999, maxWidth: "90%" },
       });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Checking completion status...");
+      if (completed && !sent) {
+        console.log("Sending results...");
+        // Convert results to json
+        const json = JSON.stringify({ "final": result!.personality, "answers": finalScores });
+        console.log("Sending results:", json);
+        // Send to tpqapi.benjs.uk/data in the sentdata header
+        fetch("https://tpqapi.benjs.uk/data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "sentdata": json,
+          },
+        });
+        setSent(true);
+      }
+    }, 300);
+    return () => clearInterval(interval);
+  }, [completed, sent, result, finalScores]);
 
   return (
     <MantineProvider>

@@ -1,7 +1,9 @@
 const express = require("express");
+const cors = require("cors");
 const fs = require("fs");
 
 const app = express();
+app.use(cors({ origin: "http://localhost:5173" }));
 const PORT = process.env.PORT || 1969;
 
 app.get("/", (req, res) => {
