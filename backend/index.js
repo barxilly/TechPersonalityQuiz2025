@@ -34,10 +34,6 @@ app.post("/data", (req, res) => {
     console.error("Missing answers in data:", datajson);
     return res.status(400).json({ error: "Missing answers" });
   }
-  if (!Array.isArray(answers) && typeof answers !== "number") {
-    console.error("Invalid answers type in data:", datajson);
-    return res.status(400).json({ error: "Invalid answers type" });
-  }
 
   if (typeof final === "undefined" || final === null) {
     console.error("Missing final in data:", datajson);
